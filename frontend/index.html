@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pose Insight | 姿态分析</title>
+    <link rel="stylesheet" href="/app/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <p class="eyebrow">YOLO-POSE · LLM AGENT</p>
+        <h1>姿态分析工作台</h1>
+        <p class="subtitle">上传一张图片，生成关键点可视化和可解释的动作分析报告。</p>
+      </header>
+      <section class="upload-card" id="drop-zone">
+        <input id="file-input" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+        <div class="upload-icon">↑</div>
+        <h2>选择或拖拽图片</h2>
+        <p>支持 JPG、PNG、WEBP，最大 10 MB</p>
+        <button id="select-button" type="button">选择图片</button>
+        <p class="file-name" id="file-name"></p>
+      </section>
+      <section class="progress" id="progress" hidden>
+        <span class="spinner"></span><span id="progress-text">正在上传并进行姿态检测…</span>
+      </section>
+      <p class="error" id="error" role="alert"></p>
+      <section id="results" hidden>
+        <div class="image-grid">
+          <figure><figcaption>原始图片</figcaption><img id="original-image" alt="上传的原始图片" /></figure>
+          <figure><figcaption>YOLO-Pose 关键点可视化</figcaption><img id="pose-image" alt="人体关键点与骨架可视化" /></figure>
+        </div>
+        <article class="report-card">
+          <div class="report-head"><div><p class="eyebrow">ANALYSIS REPORT</p><h2 id="report-title"></h2></div><span class="badge" id="provider"></span></div>
+          <p id="report-summary" class="summary"></p>
+          <div class="report-grid">
+            <section><h3>姿态判断</h3><p id="report-posture"></p></section>
+            <section><h3>检测信息</h3><p id="detection-meta"></p></section>
+            <section><h3>观察</h3><ul id="observations"></ul></section>
+            <section><h3>建议</h3><ul id="recommendations"></ul></section>
+          </div>
+          <p class="limitations" id="limitations"></p>
+        </article>
+      </section>
+    </main>
+    <script src="/app/app.js"></script>
+  </body>
+</html>
+

@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+data/uploads/*
+data/reports/*
+models/*
+!data/uploads/.gitkeep
+!data/reports/.gitkeep
+!models/.gitkeep
+
