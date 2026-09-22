@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import Literal
 
 from backend.app.schemas import AnalysisReport, PoseDetection
+
+logger = logging.getLogger(__name__)
 
 
 class ActionAnalysisAgent:
@@ -13,14 +16,17 @@ class ActionAnalysisAgent:
         self.api_key = api_key
         self.base_url = base_url
         self.model = model
+        self.last_error: str = ""
 
     def analyze(self, detections: list[PoseDetection]) -> tuple[AnalysisReport, Literal["openai", "local-rules"]]:
         if self.api_key:
             try:
                 return self._analyze_with_llm(detections), "openai"
-            except Exception:
-                # Provider errors should not break the visual-inspection workflow.
-                pass
+            except Exception as exc:
+                # 调用失败不能中断检测流程，但必须留下原因——
+                # 之前这里是静默 pass，配了 key 却一直走本地规则也查不出为什么。
+                self.last_error = f"{type(exc).__name__}: {exc}"
+                logger.warning("LLM 分析失败，回退本地规则：%s", self.last_error)
         return self._analyze_locally(detections), "local-rules"
 
     def _analyze_with_llm(self, detections: list[PoseDetection]) -> AnalysisReport:
@@ -32,8 +38,10 @@ class ActionAnalysisAgent:
             "你是人体姿态分析助手。只根据 YOLO-Pose 的二维关键点证据给出谨慎的中文分析；"
             "不要诊断疾病、不要假装看到了关键点以外的信息。单张图片无法确认连续动作时必须说明不确定性。\n\n"
             f"检测结果：{json.dumps(evidence, ensure_ascii=False)}\n\n"
-            "请严格返回 JSON，字段为 title、summary、posture、observations（字符串数组）、"
-            "recommendations（字符串数组）、limitations。"
+            "请严格返回 JSON，字段与类型如下："
+            "title（字符串）、summary（字符串）、posture（字符串）、"
+            "observations（字符串数组）、recommendations（字符串数组）、"
+            "limitations（字符串，不是数组）。"
         )
         response = client.chat.completions.create(
             model=self.model,
@@ -76,4 +84,3 @@ class ActionAnalysisAgent:
             ],
             limitations="单张图片只能估计二维姿态，不能可靠判定动作过程、三维角度或健康状况。",
         )
-

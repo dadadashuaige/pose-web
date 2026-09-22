@@ -57,7 +57,9 @@ async def analyze_image(file: UploadFile = File(...)) -> AnalyzeResponse:
     content = await file.read()
     if not content:
         raise HTTPException(400, "上传文件为空")
-    if len(content) > settings.max_upload_mb * 1024 * 1024:
+    # MAX_UPLOAD_MB=0 表示不限制大小（与 .env.example 的约定一致）。
+    # 原实现直接拿 0 做比较，导致上限变成 0 字节，任何文件都会被 413 拒绝。
+    if settings.max_upload_mb > 0 and len(content) > settings.max_upload_mb * 1024 * 1024:
         raise HTTPException(413, f"图片不能超过 {settings.max_upload_mb} MB")
     try:
         with Image.open(BytesIO(content)) as image:
