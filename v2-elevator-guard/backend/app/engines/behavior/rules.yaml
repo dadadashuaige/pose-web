@@ -1,0 +1,79 @@
+# 电梯轿厢六种危险行为规则。阈值可改，改完重启服务或在页面点「重新分析」生效。
+#
+# 量纲约定
+#   距离/位移 -> 以「躯干长度」为单位，0 表示落在门区域内
+#   速度      -> 每秒移动的躯干长度倍数
+#   角度      -> 偏离竖直的度数，0° 为笔直站立
+#
+# 其中 踢门 / 扒门 / 推门 / 靠门 四类都需要门区域（DOOR_ROI）作为参照。
+# 没标定门区域时这四条不会命中，报告里会给出提示。
+version: 2
+
+rules:
+  fall:
+    label: 摔倒
+    risk_level: high
+    params:
+      min_torso_angle: 55      # 躯干偏离竖直超过该角度视为倒地
+      drop_window_s: 1.2       # 在该时间窗内观察重心下降
+      min_drop: 0.45           # 重心下降幅度（躯干长度倍数）
+      min_confidence: 0.55
+
+  fight:
+    label: 打架
+    risk_level: high
+    params:
+      min_people: 2
+      max_pair_ratio: 2.4      # 最近两人距离上限（躯干长度倍数）
+      wrist_speed_min: 1.8
+      min_duration_s: 0.6
+      min_confidence: 0.55
+
+  kick_door:
+    label: 踢门
+    risk_level: high
+    params:
+      ankle_speed_min: 1.6     # 脚踝瞬时速度阈值
+      ankle_door_max_dist: 1.0 # 脚踝距门区域上限
+      min_ankle_split: 0.25    # 两脚踝垂直落差，用于区分「踢」与「原地站立」
+      min_confidence: 0.5
+
+  pry_door:
+    label: 扒门
+    risk_level: high
+    params:
+      wrist_door_max_dist: 0.55  # 双手都要离门足够近
+      wrist_speed_min: 1.1       # 手部持续开合动作
+      min_duration_s: 0.6
+      min_confidence: 0.5
+
+  push_door:
+    label: 推门
+    risk_level: medium
+    params:
+      near_door_max_dist: 1.1
+      toward_speed_min: 0.35
+      toward_fraction_min: 0.55  # 窗口内「朝门移动」帧数占比
+      min_duration_s: 0.8
+      min_confidence: 0.5
+
+  lean_door:
+    label: 靠门
+    risk_level: medium
+    params:
+      near_door_max_dist: 0.7
+      min_dwell_s: 1.5
+      max_speed: 0.55            # 靠门时人物基本静止
+      min_confidence: 0.45
+
+# 同一时刻命中多条时，按此顺序取优先级最高的一个，避免重复报警
+priority: [fall, fight, kick_door, pry_door, push_door, lean_door]
+
+risk_levels:
+  high: 高风险
+  medium: 中风险
+  low: 低风险
+  none: 未发现异常
+
+# 四类门相关行为；未标定门区域时这些规则不参与判定
+door_required: [kick_door, pry_door, push_door, lean_door]

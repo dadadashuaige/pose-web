@@ -1,0 +1,30 @@
+services:
+  elevator-guard:
+    build: .
+    image: elevator-guard:latest
+    container_name: elevator-guard
+    ports:
+      # 左边是宿主机端口，被占用就改这里，或用 HOST_PORT=8010 docker compose up 覆盖
+      - "${HOST_PORT:-8000}:8000"
+    environment:
+      DEVICE: cpu
+      DATABASE_URL: sqlite:////app/backend/data/elevator_risk.db
+      YOLO_CONFIG_DIR: /app/backend/data/ultralytics
+      # 姿态模型：容器里默认用可自动下载的通用权重
+      POSE_ENGINE: ${POSE_ENGINE:-yolo11n}
+      # 行为识别：rule 可判摔倒/打架；标定门区域后还能判踢门/推门/扒门/靠门
+      BEHAVIOR_ENGINE: ${BEHAVIOR_ENGINE:-rule}
+      ADVICE_ENGINE: ${ADVICE_ENGINE:-template}
+      DOOR_ROI: ${DOOR_ROI:-}
+      # 大模型配置：留空则全程走本地规则，功能不受影响
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4.1-mini}
+    volumes:
+      # 运行产物：上传的文件、可视化视频、报告、数据库
+      - ./backend/data:/app/backend/data
+      # 知识库语料：改了直接在这里改，再调 /api/knowledge/rebuild
+      - ./backend/knowledge:/app/backend/knowledge
+      # 想用自训练的 MEC-Pose 时，把权重目录挂进来，并设置 MEC_WEIGHTS / MEC_REPO
+      # - ./models:/app/models:ro
+    restart: unless-stopped

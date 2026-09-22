@@ -1,0 +1,18 @@
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30,<1.0
+python-multipart>=0.0.9
+sqlalchemy>=2.0,<3.0
+pymysql>=1.1,<2.0
+opencv-python>=4.8
+numpy>=1.24
+pandas>=2.0
+requests>=2.31
+PyYAML>=6.0
+Pillow>=10.0
+tqdm>=4.66
+matplotlib>=3.7
+seaborn>=0.13
+# PyTorch 与 torchvision 请使用目标设备匹配的一对版本；当前项目环境建议：
+# torch==2.8.0+cu128  torchvision==0.23.0+cu128（从 PyTorch cu128 索引安装）
+reportlab>=4.0
+pytest>=8.0

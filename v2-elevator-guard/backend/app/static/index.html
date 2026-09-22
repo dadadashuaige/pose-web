@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Elevator Guard · 电梯危险行为智能预警系统</title>
+<link rel="stylesheet" href="/style.css?v=3">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <p class="eyebrow">MEC-POSE · YOLO-POSE · RISK AGENT</p>
+    <h1>Elevator Guard</h1>
+    <p class="subtitle">电梯危险行为智能预警系统 · 前端 v3</p>
+  </div>
+  <div id="health" class="chips">正在检查系统…</div>
+</header>
+
+<main class="layout">
+  <aside class="col-left">
+    <section class="card" id="upload-card">
+      <div class="section-heading">
+        <div><p class="eyebrow">STEP 01</p><h2>新建分析</h2></div>
+      </div>
+      <form id="uploadForm">
+        <label class="drop" id="dropZone">
+          <input id="video" type="file" accept="video/*,image/*">
+          <span class="drop-title">选择电梯监控视频或图片</span>
+          <small>MP4 / AVI / MOV / MKV / WEBM / JPG / PNG</small>
+        </label>
+
+        <div id="fileInfo" class="file-info hidden">
+          <video id="preview" class="preview" muted playsinline></video>
+          <div class="file-meta">
+            <b id="fileName"></b>
+            <span id="fileSize" class="muted"></span>
+          </div>
+          <button type="button" class="link" id="clearFile">移除</button>
+        </div>
+
+        <div class="engine-grid">
+          <label><span>姿态模型</span><select id="poseEngine"></select></label>
+          <label><span>行为识别</span><select id="behaviorEngine"></select></label>
+          <label><span>建议来源</span><select id="adviceEngine"></select></label>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" id="compareAdvice">
+          <span>对比全部建议引擎（模板 / 大模型 / 大模型+知识库，便于横向比较）</span>
+        </label>
+
+        <button type="submit" id="submitBtn">开始分析</button>
+
+        <div id="progressWrap" class="progress hidden">
+          <div class="bar"><i id="progressBar"></i></div>
+          <p id="uploadStatus" class="muted"></p>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="section-heading">
+        <div><p class="eyebrow">ANALYSIS QUEUE</p><h2>分析记录</h2></div>
+        <button class="ghost" id="refresh">刷新</button>
+      </div>
+
+      <div class="filters">
+        <input id="searchInput" type="search" placeholder="搜索文件名…">
+        <select id="statusFilter">
+          <option value="">全部状态</option>
+          <option value="completed">已完成</option>
+          <option value="processing,queued">进行中</option>
+          <option value="failed">失败</option>
+        </select>
+        <select id="riskFilter">
+          <option value="">全部风险</option>
+          <option value="高风险">高风险</option>
+          <option value="中风险">中风险</option>
+          <option value="低风险">低风险</option>
+        </select>
+        <select id="archiveFilter">
+          <option value="0">当前记录</option>
+          <option value="1">已归档</option>
+        </select>
+      </div>
+
+      <div id="stats" class="stats"></div>
+      <div id="list" class="records"><p class="muted">加载中…</p></div>
+      <div class="pager">
+        <button class="ghost" id="prevPage">上一页</button>
+        <span id="pageInfo" class="muted"></span>
+        <button class="ghost" id="nextPage">下一页</button>
+      </div>
+      <div class="maintenance">
+        <button class="ghost" id="bulkDelete" disabled>删除选中</button>
+        <button class="ghost" id="cleanupFailed">清理失败任务</button>
+        <button class="ghost" id="cleanupRaw">清理过期原始视频</button>
+      </div>
+    </section>
+  </aside>
+
+  <section class="col-right">
+    <section class="card" id="pipeline-card">
+      <div class="section-heading">
+        <div><p class="eyebrow">LIVE PIPELINE</p><h2>从视频到处置建议</h2></div>
+        <span class="micro" id="pipelineHint">选择一个任务查看每一步的真实状态</span>
+      </div>
+      <div class="flow" id="flow"></div>
+    </section>
+
+    <section class="card" id="detail-card">
+      <div class="section-heading">
+        <div><p class="eyebrow">RESULT</p><h2>任务详情</h2></div>
+        <div id="detailActions" class="detail-actions"></div>
+      </div>
+      <div id="detailBody" class="detail-body empty">请选择一个任务</div>
+    </section>
+  </section>
+</main>
+
+<template id="recordTpl">
+  <article class="record">
+    <label class="record-check"><input type="checkbox"></label>
+    <div class="record-main">
+      <div class="record-top">
+        <strong class="r-name"></strong>
+        <span class="status"></span>
+      </div>
+      <div class="record-meta"></div>
+      <div class="record-badges"></div>
+    </div>
+  </article>
+</template>
+
+<script src="/app.js?v=3"></script>
+</body>
+</html>
